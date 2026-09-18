@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RessourcenFinder HRO – Anfrage stellen</title>
+<style>
+  :root {
+    --ink: #1c2733;
+    --ink-soft: #5b6b78;
+    --paper: #ffffff;
+    --card: #f7f9fa;
+    --card-line: #d7e3ee;
+    --brand-700: #00537f;
+    --brand-600: #0069b4;
+    --brand-100: #e5f0f9;
+    --accent-ink: #355014;
+    --clay: #c0392b;
+    --clay-100: #fbe9e0;
+    --header-line: #0a557f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Segoe UI", -apple-system, "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 64px;
+  }
+  .band {
+    background: linear-gradient(180deg, var(--brand-600), var(--brand-700));
+    color: #ffffff;
+    padding: 22px 16px 26px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid var(--header-line);
+  }
+  .band::after {
+    content: "";
+    position: absolute;
+    right: -30px;
+    bottom: -40px;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
+  }
+  .band-inner { max-width: 640px; margin: 0 auto; position: relative; }
+  .band h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 4vw, 1.55rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .band .tagline {
+    margin: 2px 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+  .intro {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 18px 16px 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 18px 16px 0; }
+  form {
+    background: var(--paper);
+    border: 1px solid var(--card-line);
+    border-radius: 10px;
+    padding: 26px;
+    box-shadow: 0 1px 3px rgba(10, 40, 60, 0.06);
+  }
+  @media (max-width: 480px) { form { padding: 18px; } }
+  fieldset { border: none; padding: 0; margin: 0 0 26px; }
+  fieldset:last-of-type { margin-bottom: 0; }
+  fieldset legend {
+    font-weight: 600;
+    color: var(--brand-700);
+    padding: 0 0 10px;
+    font-size: 1.02rem;
+    width: 100%;
+    border-bottom: 1px solid var(--card-line);
+    margin-bottom: 16px;
+  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 14px 0 5px;
+    color: var(--ink);
+  }
+  label .opt { font-weight: 400; color: var(--ink-soft); }
+  input, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--card-line);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--ink);
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--brand-600);
+    box-shadow: 0 0 0 3px rgba(0, 105, 180, 0.22);
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  .hint { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
+  .err-msg { font-size: 0.8rem; color: var(--clay); margin-top: 4px; display: none; }
+  .field.invalid input, .field.invalid textarea { border-color: var(--clay); }
+  .field.invalid .err-msg { display: block; }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 4px; }
+  @media (max-width: 480px) { .stat-row { grid-template-columns: 1fr; } }
+  .qty-card {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .qty-card label {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .qty-icon { width: 22px; height: 22px; flex: none; color: var(--brand-700); }
+  .qty-card input {
+    background: var(--paper);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-ink);
+    border: none;
+    padding: 2px 0;
+  }
+  .qty-card input:focus { box-shadow: none; }
+  button[type="submit"] {
+    width: 100%;
+    background: var(--brand-600);
+    color: #ffffff;
+    border: 2px solid var(--brand-600);
+    padding: 13px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-family: inherit;
+  }
+  button[type="submit"]:hover { background: var(--brand-700); border-color: var(--brand-700); }
+  button[type="submit"]:disabled { background: var(--card-line); border-color: var(--card-line); color: var(--ink-soft); cursor: not-allowed; }
+  #status {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    display: none;
+  }
+  #status.ok { display: block; background: var(--brand-100); color: var(--brand-700); border: 1px solid var(--brand-600); }
+  #status.fail { display: block; background: var(--clay-100); color: var(--clay); border: 1px solid var(--clay); }
+  .plz-ort { display: grid; grid-template-columns: 120px 1fr; gap: 12px; }
+  @media (max-width: 480px) { .plz-ort { grid-template-columns: 1fr; } }
+  footer {
+    max-width: 640px;
+    margin: 24px auto 0;
+    padding: 14px 16px 0;
+    border-top: 1px solid var(--card-line);
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="band">
+  <div class="band-inner">
+    <h1>RessourcenFinder HRO</h1>
+    <p class="tagline">Mehrweg für deine Stadt am Meer</p>
+  </div>
+</div>
+
+<p class="intro">Becher &amp; Schalen für eure Veranstaltung leihen – dieses Formular ist ohne Anmeldung nutzbar. KuBuS e. V. meldet sich nach Prüfung der Verfügbarkeit per E-Mail zurück.</p>
+
+<div class="wrap">
+  <form id="anfrageForm" novalidate>
+    <fieldset>
+      <legend>Veranstaltung</legend>
+
+      <div class="field">
+        <label for="veranstaltung">Name der Veranstaltung / Organisation <span class="opt">(Pflichtfeld)</span></label>
+        <input type="text" id="veranstaltung" name="veranstaltung" required>
+        <div class="err-msg">Bitte einen Namen für die Veranstaltung angeben.</div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="nutzungstag">Abholtag <span class="opt">(Pflichtfeld)</span></label>
+          <input type="date" id="nutzungstag" name="nutzungstag" required>
+          <div class="err-msg">Bitte ein gültiges Abholdatum wählen.</div>
+        </div>
+        <div class="field">
+          <label for="rueckgabetag">Rückgabetag <span class="opt">(Pflichtfeld)</span></label>
+          <input type="date" id="rueckgabetag" name="rueckgabetag" required>
+          <div class="err-msg">Rückgabetag muss am oder nach dem Abholtag liegen.</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="qty-card">
+          <label for="becherMenge">
+            <svg class="qty-icon" viewBox="0 0 64 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M10 14C10 10 15 8 32 8C49 8 54 10 54 14L48 68C47 72 44 74 32 74C20 74 17 72 16 68Z" stroke="currentColor" stroke-width="4.5" stroke-linejoin="round"/>
+              <path d="M13 15C18 18.5 46 18.5 51 15" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M18 64C22 66 42 66 46 64" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            Becher Menge
+          </label>
+          <input type="number" id="becherMenge" name="becherMenge" min="0" step="1" value="0">
+          <div class="hint">Verfügbarkeit wird automatisch geprüft.</div>
+        </div>
+        <div class="qty-card">
+          <label for="tellerMenge">
+            <svg class="qty-icon" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M8 24C8 20 20 17 50 17C80 17 92 20 92 24C92 46 74 60 50 60C26 60 8 46 8 24Z" stroke="currentColor" stroke-width="4.5" stroke-linejoin="round"/>
+              <path d="M11 25C20 29.5 80 29.5 89 25" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M39 60H61C63.2 60 65 61.3 65 63C65 64.7 63.2 66 61 66H39C36.8 66 35 64.7 35 63C35 61.3 36.8 60 39 60Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            </svg>
+            Schalen Menge
+          </label>
+          <input type="number" id="tellerMenge" name="tellerMenge" min="0" step="1" value="0">
+          <div class="hint">Gebinde à 160 Stück.</div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Kontakt</legend>
+
+      <div class="field">
+        <label for="ansprechpartner">Ansprechpartner/in <span class="opt">(Pflichtfeld)</span></label>
+        <input type="text" id="ansprechpartner" name="ansprechpartner" required>
+        <div class="err-msg">Bitte einen Namen angeben.</div>
+      </div>
+
+      <div class="field">
+        <label for="organisation">Organisation <span class="opt">(optional)</span></label>
+        <input type="text" id="organisation" name="organisation">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="email">E-Mail-Adresse <span class="opt">(Pflichtfeld)</span></label>
+          <input type="email" id="email" name="email" required>
+          <div class="err-msg">Bitte eine gültige E-Mail-Adresse angeben.</div>
+        </div>
+        <div class="field">
+          <label for="telefon">Telefon <span class="opt">(optional)</span></label>
+          <input type="tel" id="telefon" name="telefon">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Adresse der Abholung/Nutzung <span class="opt">(optional)</span></legend>
+
+      <div class="field">
+        <label for="strasse">Straße/Nr.</label>
+        <input type="text" id="strasse" name="strasse">
+      </div>
+
+      <div class="plz-ort">
+        <div class="field">
+          <label for="plz">PLZ</label>
+          <input type="text" id="plz" name="plz" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="ort">Ort</label>
+          <input type="text" id="ort" name="ort">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bemerkung">Bemerkung</label>
+        <textarea id="bemerkung" name="bemerkung" placeholder="z. B. Besonderheiten zur Abholung, Anzahl Personen, Aufbauzeiten ..."></textarea>
+      </div>
+    </fieldset>
+
+    <button type="submit" id="submitBtn">Anfrage absenden</button>
+    <div id="status"></div>
+  </form>
+
+  <footer>KuBuS e. V. &nbsp;|&nbsp; Plastikfreie Stadt Rostock</footer>
+</div>
+
+<script>
+  // WICHTIG: Hier die HTTP-URL aus dem Power-Automate-Flow
+  // "RessourcenFinder - Webformular Eingang" (Trigger -> Feld "HTTP-URL")
+  // eintragen, bevor diese Seite live geschaltet wird.
+  const FLOW_URL = "HIER_FLOW_URL_EINFUEGEN";
+
+  const form = document.getElementById('anfrageForm');
+  const statusBox = document.getElementById('status');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function setInvalid(fieldEl, invalid) {
+    const wrapper = fieldEl.closest('.field');
+    if (!wrapper) return;
+    wrapper.classList.toggle('invalid', invalid);
+  }
+
+  function isValidEmail(value) {
+    if (/\s/.test(value)) return false;
+    const at = value.indexOf('@');
+    if (at < 1) return false;
+    const dot = value.indexOf('.', at);
+    return dot > at + 1 && dot < value.length - 1;
+  }
+
+  function validate() {
+    let valid = true;
+    ['veranstaltung', 'nutzungstag', 'rueckgabetag', 'ansprechpartner', 'email'].forEach(name => {
+      const el = form.elements[name];
+      const empty = !el.value.trim();
+      setInvalid(el, empty);
+      if (empty) valid = false;
+    });
+
+    const emailEl = form.elements['email'];
+    if (emailEl.value.trim() && !isValidEmail(emailEl.value.trim())) {
+      setInvalid(emailEl, true);
+      valid = false;
+    }
+
+    const abholEl = form.elements['nutzungstag'];
+    const rueckEl = form.elements['rueckgabetag'];
+    if (abholEl.value && rueckEl.value && rueckEl.value < abholEl.value) {
+      setInvalid(rueckEl, true);
+      valid = false;
+    }
+    return valid;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusBox.className = '';
+    statusBox.style.display = 'none';
+    if (!validate()) return;
+
+    if (!FLOW_URL || FLOW_URL.indexOf('HIER_FLOW_URL') !== -1) {
+      statusBox.textContent = 'Formular ist noch nicht verbunden (Flow-URL fehlt). Bitte KuBus e.V. kontaktieren.';
+      statusBox.className = 'fail';
+      return;
+    }
+
+    const payload = {
+      veranstaltung: form.elements['veranstaltung'].value.trim(),
+      nutzungstag: form.elements['nutzungstag'].value,
+      rueckgabetag: form.elements['rueckgabetag'].value,
+      becherMenge: parseInt(form.elements['becherMenge'].value || '0', 10),
+      tellerMenge: parseInt(form.elements['tellerMenge'].value || '0', 10),
+      ansprechpartner: form.elements['ansprechpartner'].value.trim(),
+      organisation: form.elements['organisation'].value.trim(),
+      email: form.elements['email'].value.trim(),
+      telefon: form.elements['telefon'].value.trim(),
+      strasse: form.elements['strasse'].value.trim(),
+      plz: form.elements['plz'].value.trim(),
+      ort: form.elements['ort'].value.trim(),
+      bemerkung: form.elements['bemerkung'].value.trim()
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gesendet ...';
+
+    try {
+      const res = await fetch(FLOW_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        statusBox.textContent = 'Vielen Dank! Ihre Anfrage wurde übermittelt. Sie erhalten in Kürze eine Rückmeldung per E-Mail.';
+        statusBox.className = 'ok';
+        form.reset();
+      } else {
+        statusBox.textContent = 'Beim Absenden ist ein Fehler aufgetreten (Status ' + res.status + '). Bitte später erneut versuchen.';
+        statusBox.className = 'fail';
+      }
+    } catch (err) {
+      statusBox.textContent = 'Die Anfrage konnte nicht gesendet werden. Bitte Internetverbindung prüfen und erneut versuchen.';
+      statusBox.className = 'fail';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Anfrage absenden';
+    }
+  });
+
+  document.getElementById('nutzungstag').addEventListener('change', (e) => {
+    document.getElementById('rueckgabetag').min = e.target.value;
+  });
+</script>
+</body>
+</html>
